@@ -1,6 +1,11 @@
 const express = require("express");
 const path = require("path");
-const { WebcastPushConnection } = require("tiktok-live-connector");
+const TikTokLiveConnector = require("tiktok-live-connector");
+
+const WebcastPushConnection =
+    TikTokLiveConnector.WebcastPushConnection ||
+    TikTokLiveConnector.default ||
+    TikTokLiveConnector;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
