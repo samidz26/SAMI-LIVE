@@ -1,0 +1,83 @@
+.background {
+    position: absolute;
+    inset: -30%;
+
+    background:
+        radial-gradient(
+            circle at 20% 20%,
+            rgba(180, 120, 40, 0.20),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 80% 70%,
+            rgba(120, 70, 180, 0.18),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 50% 50%,
+            rgba(255, 190, 70, 0.08),
+            transparent 40%
+        ),
+        linear-gradient(
+            135deg,
+            #050505,
+            #101010,
+            #070707
+        );
+
+    animation:
+        moveBackground 14s ease-in-out infinite alternate;
+}
+
+@keyframes moveBackground {
+
+    0% {
+        transform:
+            scale(1)
+            translate(0, 0);
+    }
+
+    50% {
+        transform:
+            scale(1.15)
+            translate(-3%, 2%);
+    }
+
+    100% {
+        transform:
+            scale(1.08)
+            translate(3%, -3%);
+    }
+}
+
+/* خطوط ضوئية خفيفة */
+
+.background::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background:
+        repeating-linear-gradient(
+            115deg,
+            transparent 0,
+            transparent 80px,
+            rgba(255, 255, 255, 0.015) 81px,
+            transparent 82px
+        );
+
+    animation:
+        backgroundShine 10s linear infinite;
+}
+
+@keyframes backgroundShine {
+
+    from {
+        transform: translateX(-100px);
+    }
+
+    to {
+        transform: translateX(100px);
+    }
+}
