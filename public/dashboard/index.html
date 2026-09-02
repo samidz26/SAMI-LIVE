@@ -29,29 +29,25 @@
 
             <nav class="navigation">
 
-                <button
-                    class="nav-button active"
+                <button class="nav-button active"
                     data-page="dashboard"
                     onclick="navigateTo('/dashboard/')">
                     الرئيسية
                 </button>
 
-                <button
-                    class="nav-button"
+                <button class="nav-button"
                     data-page="stream"
                     onclick="navigateTo('/stream/')">
                     البث
                 </button>
 
-                <button
-                    class="nav-button"
+                <button class="nav-button"
                     data-page="games"
                     onclick="navigateTo('/games/')">
                     الألعاب
                 </button>
 
-                <button
-                    class="nav-button"
+                <button class="nav-button"
                     data-page="settings"
                     onclick="navigateTo('/settings/')">
                     الإعدادات
@@ -61,19 +57,40 @@
 
             <section class="dashboard-content">
 
-                <div class="dashboard-status">
-                    <span class="status-dot"></span>
-                    <span id="connectionStatus">جاري تحميل الحالة...</span>
+                <!-- أفضل المكبسين -->
+
+                <div class="tappers-section">
+
+                    <div class="section-title">
+                        🔥 أفضل المكبسين
+                    </div>
+
+                    <div id="tappersList" class="tappers-list">
+
+                        <div class="no-data">
+                            بانتظار التكبيس...
+                        </div>
+
+                    </div>
+
                 </div>
 
-                <div class="dashboard-empty">
-                    <div class="empty-title">
-                        SAMI LIVE
+                <!-- الداخلون -->
+
+                <div class="members-section">
+
+                    <div class="section-title">
+                        👥 الداخلون إلى اللايف
                     </div>
 
-                    <div class="empty-text">
-                        سيتم عرض تفاعلات اللايف هنا
+                    <div id="membersList" class="members-list">
+
+                        <div class="no-data">
+                            بانتظار دخول المتابعين...
+                        </div>
+
                     </div>
+
                 </div>
 
             </section>
@@ -83,7 +100,7 @@
     </main>
 
     <script src="/shared/common.js"></script>
-<script src="/dashboard/app.js"></script>
+    <script src="/dashboard/app.js"></script>
 
 </body>
 
