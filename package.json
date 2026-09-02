@@ -1,0 +1,13 @@
+{
+  "name": "sami-live",
+  "version": "1.0.0",
+  "description": "SAMI LIVE - TikTok LIVE Interaction System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "tiktok-live-connector": "^2.1.1"
+  }
+}
