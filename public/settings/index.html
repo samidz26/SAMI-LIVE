@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SAMI LIVE - الإعدادات</title>
+
+    <link rel="stylesheet" href="/shared/frame.css">
+    <link rel="stylesheet" href="/shared/background.css">
+    <link rel="stylesheet" href="/shared/header.css">
+    <link rel="stylesheet" href="/shared/navigation.css">
+</head>
+
+<body>
+
+    <main class="app">
+
+        <div class="background"></div>
+
+        <div class="content">
+
+            <header class="app-header">
+                <div class="app-logo">SAMI LIVE</div>
+                <div class="app-subtitle">LIVE CONTROL</div>
+            </header>
+
+            <nav class="navigation">
+
+                <button
+                    class="nav-button"
+                    data-page="dashboard"
+                    onclick="navigateTo('/dashboard/')">
+                    الرئيسية
+                </button>
+
+                <button
+                    class="nav-button"
+                    data-page="stream"
+                    onclick="navigateTo('/stream/')">
+                    البث
+                </button>
+
+                <button
+                    class="nav-button"
+                    data-page="games"
+                    onclick="navigateTo('/games/')">
+                    الألعاب
+                </button>
+
+                <button
+                    class="nav-button active"
+                    data-page="settings"
+                    onclick="navigateTo('/settings/')">
+                    الإعدادات
+                </button>
+
+            </nav>
+
+            <section class="settings-content">
+
+                <div class="settings-placeholder">
+
+                    <div class="settings-icon">
+                        ⚙️
+                    </div>
+
+                    <div class="settings-title">
+                        الإعدادات
+                    </div>
+
+                    <div class="settings-text">
+                        إعدادات SAMI LIVE ستضاف هنا
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+    <script src="/shared/common.js"></script>
+
+</body>
+
+</html>
