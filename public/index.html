@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SAMI LIVE</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            overflow: hidden;
+
+            background: #050505;
+
+            font-family:
+                Arial,
+                "Segoe UI",
+                sans-serif;
+
+            color: white;
+        }
+
+        /* الإطار الرئيسي */
+
+        .app {
+            position: relative;
+
+            width: min(92vw, 600px);
+            aspect-ratio: 1 / 1;
+
+            max-height: 92vh;
+
+            overflow: hidden;
+
+            border: 1px solid rgba(255, 255, 255, 0.18);
+
+            border-radius: 24px;
+
+            box-shadow:
+                0 0 40px rgba(0, 0, 0, 0.8),
+                inset 0 0 40px rgba(255, 255, 255, 0.03);
+
+            background: #080808;
+        }
+
+        /* الخلفية المتحركة */
+
+        .background {
+            position: absolute;
+
+            inset: -30%;
+
+            background:
+                radial-gradient(
+                    circle at 20% 20%,
+                    rgba(180, 120, 40, 0.20),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 80% 70%,
+                    rgba(120, 70, 180, 0.18),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 50% 50%,
+                    rgba(255, 190, 70, 0.08),
+                    transparent 40%
+                ),
+                linear-gradient(
+                    135deg,
+                    #050505,
+                    #101010,
+                    #070707
+                );
+
+            animation: moveBackground 14s ease-in-out infinite alternate;
+        }
+
+        @keyframes moveBackground {
+
+            0% {
+                transform: scale(1) translate(0, 0);
+            }
+
+            50% {
+                transform: scale(1.15) translate(-3%, 2%);
+            }
+
+            100% {
+                transform: scale(1.08) translate(3%, -3%);
+            }
+        }
+
+        /* طبقة فخمة فوق الخلفية */
+
+        .background::after {
+            content: "";
+
+            position: absolute;
+
+            inset: 0;
+
+            background:
+                repeating-linear-gradient(
+                    115deg,
+                    transparent 0,
+                    transparent 80px,
+                    rgba(255,255,255,0.015) 81px,
+                    transparent 82px
+                );
+
+            animation: shine 10s linear infinite;
+        }
+
+        @keyframes shine {
+
+            from {
+                transform: translateX(-100px);
+            }
+
+            to {
+                transform: translateX(100px);
+            }
+        }
+
+        /* المحتوى */
+
+        .content {
+            position: relative;
+
+            z-index: 2;
+
+            width: 100%;
+            height: 100%;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+        }
+
+        /* الاسم */
+
+        .logo {
+            margin-top: 38px;
+
+            font-size: clamp(24px, 5vw, 36px);
+
+            font-weight: 800;
+
+            letter-spacing: 3px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ffffff,
+                    #d6b36a,
+                    #ffffff
+                );
+
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+
+            text-shadow:
+                0 0 25px rgba(214, 179, 106, 0.15);
+        }
+
+        .subtitle {
+            margin-top: 8px;
+
+            font-size: 12px;
+
+            letter-spacing: 3px;
+
+            color: rgba(255,255,255,0.45);
+        }
+
+        /* منطقة الاتصال */
+
+        .connection-box {
+            width: 72%;
+
+            max-width: 380px;
+
+            margin-top: auto;
+            margin-bottom: auto;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+        }
+
+        .input-label {
+            width: 100%;
+
+            margin-bottom: 10px;
+
+            font-size: 13px;
+
+            color: rgba(255,255,255,0.65);
+
+            text-align: right;
+        }
+
+        .username {
+            width: 100%;
+
+            height: 52px;
+
+            padding: 0 18px;
+
+            border: 1px solid rgba(255,255,255,0.15);
+
+            border-radius: 14px;
+
+            outline: none;
+
+            background: rgba(0,0,0,0.35);
+
+            color: white;
+
+            font-size: 16px;
+
+            text-align: left;
+
+            direction: ltr;
+
+            transition: 0.25s;
+        }
+
+        .username:focus {
+            border-color: rgba(214,179,106,0.7);
+
+            box-shadow:
+                0 0 20px rgba(214,179,106,0.10);
+        }
+
+        .username::placeholder {
+            color: rgba(255,255,255,0.28);
+        }
+
+        /* زر الاتصال */
+
+        .connect-btn {
+            width: 100%;
+
+            height: 52px;
+
+            margin-top: 16px;
+
+            border: none;
+
+            border-radius: 14px;
+
+            cursor: pointer;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #d6b36a,
+                    #9f7630
+                );
+
+            color: #090909;
+
+            font-size: 15px;
+
+            font-weight: 800;
+
+            transition: 0.25s;
+
+            box-shadow:
+                0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 12px 30px rgba(214,179,106,0.18);
+        }
+
+        .connect-btn:active {
+            transform: translateY(0);
+        }
+
+        .connect-btn:disabled {
+            opacity: 0.6;
+
+            cursor: wait;
+
+            transform: none;
+        }
+
+        /* حالة الاتصال */
+
+        .status {
+            min-height: 25px;
+
+            margin-bottom: 32px;
+
+            font-size: 13px;
+
+            color: rgba(255,255,255,0.55);
+
+            transition: 0.25s;
+        }
+
+        .status.connecting {
+            color: #d6b36a;
+        }
+
+        .status.success {
+            color: #70d99b;
+        }
+
+        .status.error {
+            color: #ff7272;
+        }
+
+        /* الشريط السفلي */
+
+        .bottom-line {
+            position: absolute;
+
+            bottom: 14px;
+
+            width: 60px;
+
+            height: 2px;
+
+            border-radius: 10px;
+
+            background: rgba(214,179,106,0.45);
+        }
+
+        /* الهاتف */
+
+        @media (max-width: 500px) {
+
+            .app {
+                width: 94vw;
+
+                border-radius: 20px;
+            }
+
+            .connection-box {
+                width: 78%;
+            }
+
+            .logo {
+                margin-top: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app">
+
+    <div class="background"></div>
+
+    <div class="content">
+
+        <div class="logo">
+            SAMI LIVE
+        </div>
+
+        <div class="subtitle">
+            LIVE CONTROL
+        </div>
+
+        <div class="connection-box">
+
+            <div class="input-label">
+                اسم مستخدم TikTok
+            </div>
+
+            <input
+                id="username"
+                class="username"
+                type="text"
+                placeholder="@username"
+                autocomplete="off"
+                spellcheck="false"
+            >
+
+            <button
+                id="connectBtn"
+                class="connect-btn"
+            >
+                اتصال بالبث
+            </button>
+
+        </div>
+
+        <div
+            id="status"
+            class="status"
+        >
+            غير متصل
+        </div>
+
+    </div>
+
+    <div class="bottom-line"></div>
+
+</div>
+
+<script>
+
+const usernameInput = document.getElementById("username");
+const connectBtn = document.getElementById("connectBtn");
+const statusText = document.getElementById("status");
+
+connectBtn.addEventListener("click", connect);
+
+usernameInput.addEventListener("keydown", (event) => {
+
+    if (event.key === "Enter") {
+        connect();
+    }
+
+});
+
+async function connect() {
+
+    let username = usernameInput.value.trim();
+
+    username = username.replace(/^@/, "");
+
+    if (!username) {
+
+        statusText.textContent = "أدخل اسم المستخدم";
+        statusText.className = "status error";
+
+        return;
+    }
+
+    connectBtn.disabled = true;
+
+    connectBtn.textContent = "جاري الاتصال...";
+
+    statusText.textContent = "جاري الاتصال بالبث...";
+    statusText.className = "status connecting";
+
+    try {
+
+        const response = await fetch("/api/connect", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                username: username
+            })
+
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+
+            throw new Error(
+                data.message || "فشل الاتصال"
+            );
+
+        }
+
+        statusText.textContent = "تم الاتصال بالبث";
+
+        statusText.className = "status success";
+
+        /*
+         * ننتظر قليلاً حتى يتأكد السيرفر
+         * من حالة الاتصال ثم ننتقل للصفحة الرئيسية.
+         */
+
+        setTimeout(() => {
+
+            window.location.href = "/dashboard/";
+
+        }, 1000);
+
+    } catch (error) {
+
+        console.error(error);
+
+        statusText.textContent =
+            error.message || "فشل الاتصال";
+
+        statusText.className = "status error";
+
+        connectBtn.disabled = false;
+
+        connectBtn.textContent = "اتصال بالبث";
+    }
+}
+
+</script>
+
+</body>
+</html>
