@@ -1,0 +1,62 @@
+.navigation {
+    position: relative;
+    z-index: 5;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    gap: 8px;
+
+    width: 100%;
+
+    padding: 18px 14px 10px;
+}
+
+.nav-button {
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    background: rgba(255, 255, 255, 0.05);
+
+    color: rgba(255, 255, 255, 0.65);
+
+    padding: 9px 13px;
+
+    border-radius: 10px;
+
+    font-size: 11px;
+
+    cursor: pointer;
+
+    transition: 0.25s;
+}
+
+.nav-button:hover {
+    background: rgba(255, 255, 255, 0.10);
+
+    color: white;
+
+    border-color: rgba(214, 179, 106, 0.4);
+}
+
+.nav-button.active {
+    background: rgba(214, 179, 106, 0.12);
+
+    color: #d6b36a;
+
+    border-color: rgba(214, 179, 106, 0.45);
+}
+
+@media (max-width: 500px) {
+
+    .navigation {
+        gap: 5px;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .nav-button {
+        padding: 8px 9px;
+        font-size: 10px;
+    }
+}
