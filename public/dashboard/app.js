@@ -526,5 +526,5 @@ function showSpecialMember(member) {
 
         container.classList.remove("show");
 
-    }, 6000);
+    }, 10000);
 }
