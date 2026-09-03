@@ -1761,3 +1761,66 @@
         margin-top: 3px;
     }
 }
+/* =========================================
+   SAMI LIVE - PROTECT DASHBOARD LAYOUT
+   ========================================= */
+
+/* الحفاظ على تخطيط الأعمدة */
+.dashboard-layout {
+    display: grid !important;
+    grid-template-columns: 125px minmax(0, 1fr) !important;
+}
+
+/* الحفاظ على العمود الجانبي */
+.side-column {
+    display: grid !important;
+    grid-template-rows: 2fr 1fr !important;
+}
+
+/* الحفاظ على منطقة العرض الرئيسية */
+.main-display {
+    position: relative !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* حدث الهدية لا يأخذ أي مساحة من التخطيط */
+.main-event {
+    position: absolute !important;
+
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    z-index: 20 !important;
+}
+
+/* حماية محتوى العرض الأصلي */
+.display-content {
+    position: absolute !important;
+    inset: 0 !important;
+}
+
+/* =========================================
+   الشريط السفلي
+   ========================================= */
+
+.bottom-bar {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    z-index: 50 !important;
+        }
