@@ -1,36 +1,57 @@
+let lastMemberId = null;
+
+
+/* =========================================
+   LOAD DASHBOARD
+========================================= */
+
 async function loadDashboard() {
+
     try {
-        const response = await fetch("/api/status");
+
+        const response =
+            await fetch("/api/status");
 
         if (!response.ok) {
             throw new Error("Failed to load status");
         }
 
-        const data = await response.json();
+        const data =
+            await response.json();
 
         renderTappers(data.tappers || []);
-        renderMembers(data.members || []);
+
+        renderLatestMember(data.members || []);
 
     } catch (error) {
-        console.error("Dashboard error:", error);
+
+        console.error(
+            "Dashboard error:",
+            error
+        );
+
     }
 }
 
-/* =========================
-   أفضل 3 مكبسين
-========================= */
+
+/* =========================================
+   TAPPERS
+========================================= */
 
 function renderTappers(tappers) {
 
     const container =
-        document.getElementById("tappersList");
+        document.getElementById(
+            "tappersList"
+        );
 
     if (!container) return;
+
 
     if (!tappers.length) {
 
         container.innerHTML = `
-            <div class="no-data">
+            <div class="empty-state">
                 بانتظار التكبيس...
             </div>
         `;
@@ -38,172 +59,278 @@ function renderTappers(tappers) {
         return;
     }
 
-    const topThree = tappers.slice(0, 3);
 
-    container.innerHTML = topThree.map((user, index) => {
+    const topThree =
+        tappers.slice(0, 3);
 
-        const rank = index + 1;
 
-        const avatar = user.profilePicture
-            ? `
-                <img
-                    class="tapper-avatar"
-                    src="${escapeHtml(user.profilePicture)}"
-                    alt=""
-                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                >
+    container.innerHTML =
+        topThree.map(
+            (user, index) => {
 
-                <div
-                    class="tapper-avatar-placeholder"
-                    style="display:none;">
-                    👤
-                </div>
-              `
-            : `
-                <div class="tapper-avatar-placeholder">
-                    👤
-                </div>
-              `;
+                const rank =
+                    index + 1;
 
-        return `
-            <div class="tapper ${rank === 1 ? "first" : ""}">
 
-                <div class="tapper-rank">
-                    ${rank === 1 ? "🥇" : rank === 2 ? "🥈" : "🥉"}
-                </div>
+                const avatar =
+                    user.profilePicture
 
-                ${avatar}
+                    ? `
+                        <img
+                            class="tapper-avatar"
+                            src="${escapeHtml(
+                                user.profilePicture
+                            )}"
+                            alt=""
+                            onerror="
+                                this.style.display='none';
+                                this.nextElementSibling.style.display='flex';
+                            "
+                        >
 
-                <div class="tapper-name">
-                    ${escapeHtml(user.nickname || user.username)}
-                </div>
+                        <div
+                            class="tapper-avatar-placeholder"
+                            style="display:none;">
+                            👤
+                        </div>
+                    `
 
-                <div class="tapper-likes">
-                    ${Number(user.likes || 0).toLocaleString()}
-                </div>
+                    : `
+                        <div
+                            class="tapper-avatar-placeholder">
+                            👤
+                        </div>
+                    `;
 
-            </div>
-        `;
 
-    }).join("");
+                return `
+
+                    <div
+                        class="tapper ${
+                            rank === 1
+                                ? "first"
+                                : ""
+                        }">
+
+                        <div class="tapper-rank">
+
+                            ${
+                                rank === 1
+                                    ? "🥇"
+                                    : rank === 2
+                                        ? "🥈"
+                                        : "🥉"
+                            }
+
+                        </div>
+
+                        ${avatar}
+
+                        <div class="tapper-details">
+
+                            <div
+                                class="tapper-name">
+
+                                ${escapeHtml(
+                                    user.nickname ||
+                                    user.username ||
+                                    "مستخدم"
+                                )}
+
+                            </div>
+
+                            <div
+                                class="tapper-likes">
+
+                                ❤️ ${
+                                    Number(
+                                        user.likes || 0
+                                    ).toLocaleString()
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+        ).join("");
 }
 
-/* =========================
-   الداخلون
-========================= */
 
-function renderMembers(members) {
+/* =========================================
+   LATEST MEMBER
+========================================= */
+
+function renderLatestMember(members) {
 
     const container =
-        document.getElementById("membersList");
+        document.getElementById(
+            "latestMember"
+        );
 
     if (!container) return;
+
 
     if (!members.length) {
 
         container.innerHTML = `
-            <div class="no-data">
-                بانتظار دخول المتابعين...
+            <div class="empty-member">
+
+                <div class="empty-icon">
+                    ♙
+                </div>
+
+                <div>
+                    بانتظار دخول المتابعين...
+                </div>
+
             </div>
         `;
 
         return;
     }
 
-    container.innerHTML = members.map(user => {
 
-        const avatar = user.profilePicture
-            ? `
-                <img
-                    class="member-avatar"
-                    src="${escapeHtml(user.profilePicture)}"
-                    alt=""
-                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                >
+    /*
+     * members are already stored
+     * in latest-first order by server.
+     */
 
-                <div
-                    class="member-avatar-placeholder"
-                    style="display:none;">
-                    👤
-                </div>
-              `
-            : `
-                <div class="member-avatar-placeholder">
-                    👤
-                </div>
-              `;
+    const user =
+        members[0];
 
-        const time = user.joinedAt
-            ? formatTime(user.joinedAt)
-            : "";
 
-        return `
-            <div class="member">
+    const memberId =
+        user.uniqueId ||
+        user.userId ||
+        user.username ||
+        user.nickname;
 
-                ${avatar}
 
-                <div class="member-info">
+    /*
+     * إذا كان نفس الشخص ما زال ظاهرًا
+     * لا نعيد تشغيل الحركة.
+     */
 
-                    <div class="member-name">
-                        ${escapeHtml(user.nickname || user.username)}
-                    </div>
+    if (
+        memberId === lastMemberId &&
+        container.querySelector(".member-card")
+    ) {
+        return;
+    }
 
-                    <div class="member-message">
-                        مرحباً ${escapeHtml(user.nickname || user.username)} 👋
-                    </div>
 
-                </div>
+    lastMemberId =
+        memberId;
 
-                <div class="member-time">
-                    ${time}
-                </div>
 
+    const name =
+        user.nickname ||
+        user.username ||
+        "مستخدم";
+
+
+    const avatar =
+        user.profilePicture
+
+        ? `
+            <img
+                class="member-avatar"
+                src="${escapeHtml(
+                    user.profilePicture
+                )}"
+                alt=""
+                onerror="
+                    this.style.display='none';
+                    this.nextElementSibling.style.display='flex';
+                "
+            >
+
+            <div
+                class="member-avatar-placeholder"
+                style="display:none;">
+                👤
+            </div>
+        `
+
+        : `
+            <div
+                class="member-avatar-placeholder">
+                👤
             </div>
         `;
 
-    }).join("");
+
+    container.innerHTML = `
+
+        <div class="member-card">
+
+            ${avatar}
+
+            <div class="member-name">
+
+                ${escapeHtml(name)}
+
+            </div>
+
+            <div class="member-welcome">
+
+                نورت اللايف ✨
+
+            </div>
+
+        </div>
+
+    `;
 }
 
-/* =========================
-   الوقت
-========================= */
 
-function formatTime(date) {
-
-    try {
-
-        return new Date(date).toLocaleTimeString(
-            "ar-DZ",
-            {
-                hour: "2-digit",
-                minute: "2-digit"
-            }
-        );
-
-    } catch {
-
-        return "";
-    }
-}
-
-/* =========================
-   حماية HTML
-========================= */
+/* =========================================
+   SECURITY
+========================================= */
 
 function escapeHtml(value) {
 
     return String(value || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 }
 
-/* =========================
-   تحديث مباشر
-========================= */
+
+/* =========================================
+   START
+========================================= */
 
 loadDashboard();
 
-setInterval(loadDashboard, 1000);
+setInterval(
+    loadDashboard,
+    700
+);
