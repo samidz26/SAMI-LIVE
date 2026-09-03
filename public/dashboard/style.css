@@ -1086,3 +1086,177 @@
         line-height: 9px !important;
     }
     }
+/* =========================================
+   DASHBOARD SPACE OPTIMIZATION
+   ========================================= */
+
+/* تقليل عرض العمود الجانبي */
+.dashboard-layout {
+    grid-template-columns: 125px minmax(0, 1fr);
+}
+
+/* ترتيب المساحة:
+   التكبيس = 2
+   آخر الداخلين = 1
+*/
+.side-column {
+    grid-template-rows: 2fr 1fr;
+}
+
+/* قائمة المكبسين */
+.tappers-list {
+    padding: 5px;
+    gap: 4px;
+
+    justify-content: flex-start;
+    align-items: center;
+
+    overflow: hidden;
+}
+
+/* بطاقة المكبس */
+.tapper {
+    width: 100% !important;
+    min-height: 58px !important;
+
+    flex: 0 0 58px !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    gap: 2px !important;
+
+    padding: 3px !important;
+}
+
+/* الترتيب */
+.tapper-rank {
+    font-size: 12px !important;
+    line-height: 13px !important;
+}
+
+/* الصورة */
+.tapper-avatar,
+.tapper-avatar-placeholder {
+    width: 32px !important;
+    height: 32px !important;
+
+    flex-shrink: 0 !important;
+}
+
+/* التفاصيل */
+.tapper-details {
+    width: 100% !important;
+    min-width: 0 !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+
+    line-height: 1 !important;
+}
+
+/* الاسم */
+.tapper-name {
+    width: 100% !important;
+
+    font-size: 8px !important;
+    line-height: 10px !important;
+
+    text-align: center !important;
+
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* عدد التكبيسات */
+.tapper-likes {
+    margin-top: 1px !important;
+
+    font-size: 8px !important;
+    line-height: 10px !important;
+
+    text-align: center !important;
+}
+
+/* آخر الداخلين */
+.latest-member {
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* تصغير محتوى آخر الداخلين ليتناسب مع المساحة الجديدة */
+.member-avatar,
+.member-avatar-placeholder {
+    width: 55px;
+    height: 55px;
+}
+
+.member-name {
+    font-size: 10px;
+    margin-top: 6px;
+}
+
+.member-welcome {
+    font-size: 9px;
+    margin-top: 4px;
+}
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 500px) {
+
+    .dashboard-layout {
+        grid-template-columns: 92px minmax(0, 1fr);
+        gap: 6px;
+    }
+
+    .side-column {
+        grid-template-rows: 2fr 1fr;
+        gap: 6px;
+    }
+
+    .tappers-list {
+        padding: 3px;
+        gap: 3px;
+    }
+
+    .tapper {
+        min-height: 52px !important;
+        flex-basis: 52px !important;
+    }
+
+    .tapper-avatar,
+    .tapper-avatar-placeholder {
+        width: 28px !important;
+        height: 28px !important;
+    }
+
+    .tapper-rank {
+        font-size: 10px !important;
+        line-height: 11px !important;
+    }
+
+    .tapper-name {
+        font-size: 7px !important;
+        line-height: 8px !important;
+    }
+
+    .tapper-likes {
+        font-size: 7px !important;
+        line-height: 8px !important;
+    }
+
+    .member-avatar,
+    .member-avatar-placeholder {
+        width: 45px;
+        height: 45px;
+    }
+}
