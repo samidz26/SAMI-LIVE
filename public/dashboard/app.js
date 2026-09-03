@@ -435,3 +435,96 @@ function checkGiftEvents(state) {
 
     showGiftEvent(gift);
 }
+function checkSpecialMembers(state) {
+
+    if (!state || !Array.isArray(state.events)) return;
+
+    const members = state.events.filter(event =>
+        event &&
+        (
+            event.type === "member" ||
+            event.type === "roomUser"
+        )
+    );
+
+    if (!members.length) return;
+
+    const member = members[0];
+
+    const username = (
+        member.username ||
+        ""
+    ).replace(/^@/, "").toLowerCase();
+
+    if (!SPECIAL_USERS[username]) return;
+
+    const eventId =
+        member.id ||
+        `${username}-${member.time || ""}`;
+
+    if (eventId === lastSpecialMemberId) return;
+
+    lastSpecialMemberId = eventId;
+
+    showSpecialMember(member);
+}
+
+
+function showSpecialMember(member) {
+
+    const container =
+        document.getElementById("specialMember");
+
+    const avatar =
+        document.getElementById("specialAvatar");
+
+    const placeholder =
+        document.getElementById("specialAvatarPlaceholder");
+
+    const username =
+        document.getElementById("specialUsername");
+
+    if (!container) return;
+
+    const name =
+        member.nickname ||
+        member.username ||
+        "مستخدم";
+
+    username.textContent = name;
+
+    if (member.profilePicture) {
+
+        avatar.src = member.profilePicture;
+
+        avatar.style.display = "block";
+        placeholder.style.display = "none";
+
+        avatar.onerror = () => {
+
+            avatar.style.display = "none";
+            placeholder.style.display = "flex";
+
+        };
+
+    } else {
+
+        avatar.style.display = "none";
+        placeholder.style.display = "flex";
+
+    }
+
+    container.classList.remove("show");
+
+    void container.offsetWidth;
+
+    container.classList.add("show");
+
+    clearTimeout(specialMemberTimer);
+
+    specialMemberTimer = setTimeout(() => {
+
+        container.classList.remove("show");
+
+    }, 6000);
+}
