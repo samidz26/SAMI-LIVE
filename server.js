@@ -355,7 +355,9 @@ app.post(
             /* =====================================
                CONNECTED
             ===================================== */
-
+connection.on("rawData", (data) => {
+    console.log("🔥 RAW DATA RECEIVED");
+});
             connection.on(
                 "connected",
                 (state) => {
