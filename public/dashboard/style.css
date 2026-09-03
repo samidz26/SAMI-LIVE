@@ -1518,3 +1518,17 @@
 .tapper-rank {
     visibility: hidden !important;
 }
+/* =========================================
+   SAMI LIVE - STOP TAPPER BLINKING
+   ========================================= */
+
+.tapper,
+.tapper.first,
+.tapper-avatar,
+.tapper-avatar-placeholder,
+.tapper-details,
+.tapper-name,
+.tapper-likes {
+    animation: none !important;
+    transition: none !important;
+}
