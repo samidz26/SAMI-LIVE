@@ -29,6 +29,7 @@ async function loadDashboard() {
         renderTappers(data.tappers || []);
 
         renderLatestMember(data.members || []);
+        checkSpecialMembers(data);
         checkGiftEvents(data);
     } catch (error) {
 
