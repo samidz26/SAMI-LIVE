@@ -16,92 +16,142 @@
 
 <body>
 
-    <main class="app">
+<main class="app">
 
-        <div class="background"></div>
+    <div class="background"></div>
 
-        <div class="content">
+    <div class="content">
 
-            <header class="app-header">
-                <div class="app-logo">SAMI LIVE</div>
-                <div class="app-subtitle">LIVE CONTROL</div>
-            </header>
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="app-logo">SAMI LIVE</div>
+            <div class="app-subtitle">LIVE CONTROL</div>
+        </header>
 
-            <nav class="navigation">
 
-                <button class="nav-button active"
-                    data-page="dashboard"
-                    onclick="navigateTo('/dashboard/')">
-                    الرئيسية
-                </button>
+        <!-- MAIN AREA -->
+        <section class="dashboard-layout">
 
-                <button class="nav-button"
-                    data-page="stream"
-                    onclick="navigateTo('/stream/')">
-                    البث
-                </button>
+            <!-- ================================= -->
+            <!-- LEFT COLUMN -->
+            <!-- ================================= -->
 
-                <button class="nav-button"
-                    data-page="games"
-                    onclick="navigateTo('/games/')">
-                    الألعاب
-                </button>
+            <aside class="side-column">
 
-                <button class="nav-button"
-                    data-page="settings"
-                    onclick="navigateTo('/settings/')">
-                    الإعدادات
-                </button>
+                <!-- ===== TOP TAPPERS ===== -->
 
-            </nav>
+                <section class="panel tappers-panel">
 
-            <section class="dashboard-content">
-
-                <!-- أفضل المكبسين -->
-
-                <div class="tappers-section">
-
-                    <div class="section-title">
-                        🔥 أفضل المكبسين
+                    <div class="panel-title">
+                        <span>♡</span>
+                        ترتيب التكبيس
                     </div>
 
                     <div id="tappersList" class="tappers-list">
 
-                        <div class="no-data">
+                        <div class="empty-state">
                             بانتظار التكبيس...
                         </div>
 
                     </div>
 
-                </div>
+                </section>
 
-                <!-- الداخلون -->
 
-                <div class="members-section">
+                <!-- ===== LATEST MEMBER ===== -->
 
-                    <div class="section-title">
-                        👥 الداخلون إلى اللايف
+                <section class="panel join-panel">
+
+                    <div class="panel-title">
+                        <span>♙</span>
+                        آخر الداخلين
                     </div>
 
-                    <div id="membersList" class="members-list">
+                    <div id="latestMember" class="latest-member">
 
-                        <div class="no-data">
-                            بانتظار دخول المتابعين...
+                        <div class="empty-member">
+                            <div class="empty-icon">♙</div>
+                            <div>بانتظار دخول المتابعين...</div>
                         </div>
 
+                    </div>
+
+                </section>
+
+            </aside>
+
+
+            <!-- ================================= -->
+            <!-- MAIN DISPLAY -->
+            <!-- ================================= -->
+
+            <section class="main-display">
+
+                <div class="display-glow"></div>
+
+                <div class="display-content">
+
+                    <div class="display-icon">
+                        ◇
+                    </div>
+
+                    <div class="display-title">
+                        واجهة العرض الرئيسية
+                    </div>
+
+                    <div class="display-subtitle">
+                        ستظهر الأحداث الرئيسية هنا
                     </div>
 
                 </div>
 
             </section>
 
-        </div>
+        </section>
 
-    </main>
 
-    <script src="/shared/common.js"></script>
-    <script src="/dashboard/app.js"></script>
+        <!-- ================================= -->
+        <!-- NAVIGATION -->
+        <!-- ================================= -->
+
+        <nav class="navigation">
+
+            <button
+                class="nav-button active"
+                data-page="dashboard"
+                onclick="navigateTo('/dashboard/')">
+                الرئيسية
+            </button>
+
+            <button
+                class="nav-button"
+                data-page="stream"
+                onclick="navigateTo('/stream/')">
+                البث
+            </button>
+
+            <button
+                class="nav-button"
+                data-page="games"
+                onclick="navigateTo('/games/')">
+                الألعاب
+            </button>
+
+            <button
+                class="nav-button"
+                data-page="settings"
+                onclick="navigateTo('/settings/')">
+                الإعدادات
+            </button>
+
+        </nav>
+
+    </div>
+
+</main>
+
+<script src="/shared/common.js"></script>
+<script src="/dashboard/app.js"></script>
 
 </body>
-
 </html>
