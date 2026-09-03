@@ -334,3 +334,96 @@ setInterval(
     loadDashboard,
     700
 );
+/* =========================================
+   SAMI LIVE - MAIN GIFT EVENT
+   ========================================= */
+
+let giftEventTimer = null;
+let lastGiftEventId = null;
+
+function showGiftEvent(gift) {
+    const event = document.getElementById("mainEvent");
+    const avatar = document.getElementById("eventAvatar");
+    const placeholder = document.getElementById("eventAvatarPlaceholder");
+    const username = document.getElementById("eventUsername");
+    const giftName = document.getElementById("eventGiftName");
+    const giftCount = document.getElementById("eventGiftCount");
+
+    if (!event) return;
+
+    const userName =
+        gift.nickname ||
+        gift.username ||
+        "مستخدم";
+
+    const giftTitle =
+        gift.giftName ||
+        gift.name ||
+        "هدية";
+
+    const count =
+        Number(gift.count || gift.repeatCount || 1);
+
+    username.textContent = userName;
+    giftName.textContent = giftTitle;
+    giftCount.textContent = count.toLocaleString();
+
+    if (gift.profilePicture) {
+        avatar.src = gift.profilePicture;
+        avatar.style.display = "block";
+        placeholder.style.display = "none";
+
+        avatar.onerror = () => {
+            avatar.style.display = "none";
+            placeholder.style.display = "flex";
+        };
+    } else {
+        avatar.style.display = "none";
+        placeholder.style.display = "flex";
+    }
+
+    /* إعادة تشغيل الحركة */
+    event.classList.remove("show");
+
+    void event.offsetWidth;
+
+    event.classList.add("show");
+
+    clearTimeout(giftEventTimer);
+
+    giftEventTimer = setTimeout(() => {
+        event.classList.remove("show");
+    }, 5000);
+}
+
+
+/* =========================================
+   مراقبة أحداث الهدايا
+   ========================================= */
+
+function checkGiftEvents(state) {
+
+    if (!state || !Array.isArray(state.events)) return;
+
+    const gifts = state.events.filter(
+        event => event && (
+            event.type === "gift" ||
+            event.eventType === "gift"
+        )
+    );
+
+    if (!gifts.length) return;
+
+    const gift = gifts[gifts.length - 1];
+
+    const eventId =
+        gift.id ||
+        gift.eventId ||
+        `${gift.username || gift.nickname}-${gift.giftName || gift.name}-${gift.timestamp || ""}`;
+
+    if (eventId === lastGiftEventId) return;
+
+    lastGiftEventId = eventId;
+
+    showGiftEvent(gift);
+}
