@@ -1,83 +1,206 @@
 .background {
+
     position: absolute;
+
     inset: -30%;
 
+    overflow: hidden;
+
     background:
+
         radial-gradient(
-            circle at 20% 20%,
-            rgba(180, 120, 40, 0.20),
+            ellipse at 20% 20%,
+            rgba(190,70,255,0.28),
             transparent 30%
         ),
+
         radial-gradient(
-            circle at 80% 70%,
-            rgba(120, 70, 180, 0.18),
-            transparent 30%
+            ellipse at 80% 30%,
+            rgba(255,255,255,0.10),
+            transparent 25%
         ),
+
         radial-gradient(
-            circle at 50% 50%,
-            rgba(255, 190, 70, 0.08),
-            transparent 40%
+            ellipse at 70% 80%,
+            rgba(140,40,255,0.30),
+            transparent 32%
         ),
+
+        radial-gradient(
+            ellipse at 30% 75%,
+            rgba(220,100,255,0.14),
+            transparent 28%
+        ),
+
         linear-gradient(
             135deg,
-            #050505,
-            #101010,
-            #070707
+            #050008,
+            #160022,
+            #08000f,
+            #190022
         );
 
     animation:
-        moveBackground 14s ease-in-out infinite alternate;
+        backgroundMove
+        16s
+        ease-in-out
+        infinite
+        alternate;
+
 }
 
-@keyframes moveBackground {
 
-    0% {
-        transform:
-            scale(1)
-            translate(0, 0);
-    }
+/* =========================================
+   SOFT WHITE HALOS
+========================================= */
 
-    50% {
-        transform:
-            scale(1.15)
-            translate(-3%, 2%);
-    }
+.background::before {
 
-    100% {
-        transform:
-            scale(1.08)
-            translate(3%, -3%);
-    }
-}
-
-/* خطوط ضوئية خفيفة */
-
-.background::after {
     content: "";
 
     position: absolute;
-    inset: 0;
+
+    width: 70%;
+
+    height: 70%;
+
+    top: 5%;
+
+    left: 10%;
+
+    border-radius: 50%;
 
     background:
-        repeating-linear-gradient(
-            115deg,
-            transparent 0,
-            transparent 80px,
-            rgba(255, 255, 255, 0.015) 81px,
-            transparent 82px
+        radial-gradient(
+            circle,
+            rgba(255,255,255,0.10),
+            transparent 65%
         );
 
+    filter: blur(35px);
+
     animation:
-        backgroundShine 10s linear infinite;
+        haloMove
+        12s
+        ease-in-out
+        infinite
+        alternate;
 }
 
-@keyframes backgroundShine {
 
-    from {
-        transform: translateX(-100px);
+/* =========================================
+   PURPLE ENERGY
+========================================= */
+
+.background::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 120%;
+
+    height: 60%;
+
+    left: -10%;
+
+    bottom: 0;
+
+    border-radius: 50%;
+
+    border:
+        1px solid
+        rgba(220,100,255,0.20);
+
+    box-shadow:
+
+        0 0 30px
+        rgba(210,70,255,0.12),
+
+        0 0 70px
+        rgba(160,50,255,0.08);
+
+    transform:
+        rotate(-12deg);
+
+    animation:
+        energyMove
+        13s
+        ease-in-out
+        infinite
+        alternate;
+}
+
+
+/* =========================================
+   ANIMATIONS
+========================================= */
+
+@keyframes backgroundMove {
+
+    0% {
+
+        transform:
+            scale(1)
+            translate(0,0);
+
     }
 
-    to {
-        transform: translateX(100px);
+    50% {
+
+        transform:
+            scale(1.08)
+            translate(-2%,2%);
+
+    }
+
+    100% {
+
+        transform:
+            scale(1.12)
+            translate(3%,-2%);
+
+    }
+}
+
+
+@keyframes haloMove {
+
+    0% {
+
+        transform:
+            translate(-10%,-5%)
+            scale(.9);
+
+        opacity: .55;
+    }
+
+    100% {
+
+        transform:
+            translate(15%,10%)
+            scale(1.15);
+
+        opacity: .85;
+    }
+}
+
+
+@keyframes energyMove {
+
+    0% {
+
+        transform:
+            rotate(-12deg)
+            translateX(-3%);
+
+    }
+
+    100% {
+
+        transform:
+            rotate(8deg)
+            translateX(5%);
+
     }
 }
