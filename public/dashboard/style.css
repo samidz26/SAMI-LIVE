@@ -1261,24 +1261,20 @@
     }
 }
 /* =========================================
-   SAMI LIVE - COMPACT TAPPERS LAYOUT
+   SAMI LIVE - COMPACT TAPPERS
    ========================================= */
 
-/* تقليل عرض العمود الجانبي */
 .dashboard-layout {
     grid-template-columns: 125px minmax(0, 1fr) !important;
 }
 
-/* توزيع مساحة العمود:
-   ترتيب التكبيس = 2
-   آخر الداخلين = 1
-*/
+/* توزيع المساحة */
 .side-column {
     grid-template-rows: 2fr 1fr !important;
 }
 
 /* =========================================
-   قائمة ترتيب المكبسين
+   قائمة المكبسين
    ========================================= */
 
 .tappers-list {
@@ -1291,8 +1287,6 @@
     height: 100% !important;
 
     padding: 6px 4px !important;
-
-    /* المسافة بين كل مكبس */
     gap: 8px !important;
 
     overflow-y: auto !important;
@@ -1300,7 +1294,7 @@
 }
 
 /* =========================================
-   بطاقة المكبس
+   المكبس - بدون بطاقة
    ========================================= */
 
 .tapper {
@@ -1316,18 +1310,28 @@
     align-items: center !important;
     justify-content: center !important;
 
-    padding: 4px 2px !important;
-
-    /* مسافة إضافية */
+    padding: 3px 2px !important;
     margin: 0 0 2px 0 !important;
 
     gap: 2px !important;
 
-    box-sizing: border-box !important;
+    /* إزالة البطاقة */
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+
+    box-shadow: none !important;
+}
+
+/* إزالة أي تأثير خاص بالمركز الأول */
+.tapper.first {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 /* =========================================
-   الترتيب 🥇🥈🥉
+   الترتيب
    ========================================= */
 
 .tapper-rank {
@@ -1340,7 +1344,7 @@
 }
 
 /* =========================================
-   صورة المكبس
+   الصورة
    ========================================= */
 
 .tapper-avatar,
@@ -1361,7 +1365,7 @@
 }
 
 /* =========================================
-   معلومات المكبس
+   المعلومات
    ========================================= */
 
 .tapper-details {
@@ -1393,25 +1397,21 @@
     text-overflow: ellipsis !important;
 }
 
-/* عدد التكبيسات */
-.tapper-likes {
-    margin-top: 1px !important;
+/* =========================================
+   عدد التكبيسات - أكبر
+   ========================================= */
 
-    font-size: 8px !important;
-    line-height: 10px !important;
+.tapper-likes {
+    margin-top: 2px !important;
+
+    font-size: 11px !important;
+    line-height: 13px !important;
+
+    font-weight: 800 !important;
 
     text-align: center !important;
 
     white-space: nowrap !important;
-}
-
-/* =========================================
-   تمييز المركز الأول
-   ========================================= */
-
-.tapper.first {
-    box-shadow:
-        0 0 12px rgba(255, 170, 50, 0.18) !important;
 }
 
 /* =========================================
@@ -1461,15 +1461,12 @@
     }
 
     .tapper {
-        width: 100% !important;
-
         min-height: 58px !important;
         height: 58px !important;
 
         flex-basis: 58px !important;
 
-        padding: 3px 2px !important;
-
+        padding: 2px !important;
         margin-bottom: 2px !important;
 
         gap: 1px !important;
@@ -1495,8 +1492,8 @@
     }
 
     .tapper-likes {
-        font-size: 7px !important;
-        line-height: 8px !important;
+        font-size: 10px !important;
+        line-height: 12px !important;
     }
 
     .member-avatar,
@@ -1512,4 +1509,4 @@
     .member-welcome {
         font-size: 7px !important;
     }
-}
+    }
