@@ -7,6 +7,9 @@ let specialMemberTimer = null;
 let lastSpecialMemberId = null;
 let lastMemberId = null;
 
+let mainEventTimer = null;
+let lastMainEventId = null;
+
 
 /* =========================================
    LOAD DASHBOARD
@@ -26,11 +29,30 @@ async function loadDashboard() {
         const data =
             await response.json();
 
-        renderTappers(data.tappers || []);
 
-        renderLatestMember(data.members || []);
-        checkSpecialMembers(data);
-        checkGiftEvents(data);
+        /* ترتيب التكبيس */
+        renderTappers(
+            data.tappers || []
+        );
+
+
+        /* آخر الداخلين */
+        renderLatestMember(
+            data.members || []
+        );
+
+
+        /* الأشخاص المميزون */
+        checkSpecialMembers(
+            data
+        );
+
+
+        /* الهدايا + المتابعة + الاشتراك */
+        checkMainEvents(
+            data
+        );
+
     } catch (error) {
 
         console.error(
@@ -342,189 +364,502 @@ setInterval(
     loadDashboard,
     700
 );
+
+
 /* =========================================
-   SAMI LIVE - MAIN GIFT EVENT
-   ========================================= */
+   MAIN EVENTS
+   هدية + متابعة + اشتراك
+========================================= */
 
-let giftEventTimer = null;
-let lastGiftEventId = null;
+function checkMainEvents(state) {
 
-function showGiftEvent(gift) {
-    const event = document.getElementById("mainEvent");
-    const avatar = document.getElementById("eventAvatar");
-    const placeholder = document.getElementById("eventAvatarPlaceholder");
-    const username = document.getElementById("eventUsername");
-    const giftName = document.getElementById("eventGiftName");
-    const giftCount = document.getElementById("eventGiftCount");
-
-    if (!event) return;
-
-    const userName =
-        gift.nickname ||
-        gift.username ||
-        "مستخدم";
-
-    const giftTitle =
-        gift.giftName ||
-        gift.name ||
-        "هدية";
-
-    const count =
-        Number(gift.count || gift.repeatCount || 1);
-
-    username.textContent = userName;
-    giftName.textContent = giftTitle;
-    giftCount.textContent = count.toLocaleString();
-
-    if (gift.profilePicture) {
-        avatar.src = gift.profilePicture;
-        avatar.style.display = "block";
-        placeholder.style.display = "none";
-
-        avatar.onerror = () => {
-            avatar.style.display = "none";
-            placeholder.style.display = "flex";
-        };
-    } else {
-        avatar.style.display = "none";
-        placeholder.style.display = "flex";
+    if (
+        !state ||
+        !Array.isArray(state.events)
+    ) {
+        return;
     }
 
-    /* إعادة تشغيل الحركة */
-    event.classList.remove("show");
+
+    /*
+     * نبحث عن:
+     *
+     * gift
+     * follow
+     * subscribe
+     */
+
+    const events =
+        state.events.filter(
+            event =>
+                event &&
+                (
+                    event.type === "gift" ||
+                    event.type === "follow" ||
+                    event.type === "subscribe"
+                )
+        );
+
+
+    if (!events.length) {
+        return;
+    }
+
+
+    /*
+     * السيرفر يضع أحدث حدث
+     * في بداية القائمة
+     */
+
+    const latestEvent =
+        events[0];
+
+
+    const eventId =
+        latestEvent.id ||
+        latestEvent.eventId ||
+        `${latestEvent.type}-${latestEvent.username}-${latestEvent.time}`;
+
+
+    /*
+     * لا نعرض نفس الحدث مرة أخرى
+     */
+
+    if (
+        eventId === lastMainEventId
+    ) {
+        return;
+    }
+
+
+    lastMainEventId =
+        eventId;
+
+
+    showMainEvent(
+        latestEvent
+    );
+}
+
+
+/* =========================================
+   SHOW MAIN EVENT
+========================================= */
+
+function showMainEvent(data) {
+
+    const event =
+        document.getElementById(
+            "mainEvent"
+        );
+
+    const avatar =
+        document.getElementById(
+            "eventAvatar"
+        );
+
+    const placeholder =
+        document.getElementById(
+            "eventAvatarPlaceholder"
+        );
+
+    const username =
+        document.getElementById(
+            "eventUsername"
+        );
+
+    const giftName =
+        document.getElementById(
+            "eventGiftName"
+        );
+
+    const giftCount =
+        document.getElementById(
+            "eventGiftCount"
+        );
+
+    const badge =
+        event?.querySelector(
+            ".event-badge"
+        );
+
+
+    if (!event) {
+        return;
+    }
+
+
+    const userName =
+        data.nickname ||
+        data.username ||
+        "مستخدم";
+
+
+    username.textContent =
+        userName;
+
+
+    /* =====================================
+       GIFT
+    ===================================== */
+
+    if (
+        data.type === "gift"
+    ) {
+
+        badge.textContent =
+            "🎁 هدية جديدة";
+
+
+        giftName.textContent =
+            data.giftName ||
+            data.name ||
+            "هدية";
+
+
+        const count =
+            Number(
+                data.count ||
+                data.repeatCount ||
+                1
+            );
+
+
+        giftCount.textContent =
+            count.toLocaleString();
+    }
+
+
+    /* =====================================
+       FOLLOW
+    ===================================== */
+
+    else if (
+        data.type === "follow"
+    ) {
+
+        badge.textContent =
+            "🧡 متابعة جديدة";
+
+
+        giftName.textContent =
+            "تابعك الآن";
+
+
+        giftCount.textContent =
+            "";
+    }
+
+
+    /* =====================================
+       SUBSCRIBE
+    ===================================== */
+
+    else if (
+        data.type === "subscribe"
+    ) {
+
+        badge.textContent =
+            "⭐ اشتراك جديد";
+
+
+        giftName.textContent =
+            "اشترك في اللايف";
+
+
+        giftCount.textContent =
+            "";
+    }
+
+
+    /* =====================================
+       PROFILE PICTURE
+    ===================================== */
+
+    if (
+        data.profilePicture
+    ) {
+
+        avatar.src =
+            data.profilePicture;
+
+
+        avatar.style.display =
+            "block";
+
+
+        placeholder.style.display =
+            "none";
+
+
+        avatar.onerror = () => {
+
+            avatar.style.display =
+                "none";
+
+            placeholder.style.display =
+                "flex";
+
+        };
+
+    } else {
+
+        avatar.style.display =
+            "none";
+
+        placeholder.style.display =
+            "flex";
+    }
+
+
+    /* =====================================
+       SHOW ANIMATION
+    ===================================== */
+
+    event.classList.remove(
+        "show"
+    );
+
 
     void event.offsetWidth;
 
-    event.classList.add("show");
 
-    clearTimeout(giftEventTimer);
+    event.classList.add(
+        "show"
+    );
 
-    giftEventTimer = setTimeout(() => {
-        event.classList.remove("show");
-    }, 5000);
+
+    /* =====================================
+       HIDE AFTER 5 SECONDS
+    ===================================== */
+
+    clearTimeout(
+        mainEventTimer
+    );
+
+
+    mainEventTimer =
+        setTimeout(
+            () => {
+
+                event.classList.remove(
+                    "show"
+                );
+
+            },
+            5000
+        );
 }
 
 
 /* =========================================
-   مراقبة أحداث الهدايا
-   ========================================= */
+   SPECIAL MEMBERS
+========================================= */
 
-function checkGiftEvents(state) {
-
-    if (!state || !Array.isArray(state.events)) return;
-
-    const gifts = state.events.filter(
-        event => event && (
-            event.type === "gift" ||
-            event.eventType === "gift"
-        )
-    );
-
-    if (!gifts.length) return;
-
-    const gift = gifts[gifts.length - 1];
-
-    const eventId =
-        gift.id ||
-        gift.eventId ||
-        `${gift.username || gift.nickname}-${gift.giftName || gift.name}-${gift.timestamp || ""}`;
-
-    if (eventId === lastGiftEventId) return;
-
-    lastGiftEventId = eventId;
-
-    showGiftEvent(gift);
-}
 function checkSpecialMembers(state) {
 
-    if (!state || !Array.isArray(state.events)) return;
+    if (
+        !state ||
+        !Array.isArray(state.events)
+    ) {
+        return;
+    }
 
-    const members = state.events.filter(event =>
-        event &&
+
+    const members =
+        state.events.filter(
+            event =>
+                event &&
+                (
+                    event.type === "member" ||
+                    event.type === "roomUser"
+                )
+        );
+
+
+    if (!members.length) {
+        return;
+    }
+
+
+    /*
+     * أحدث شخص يدخل موجود في البداية
+     */
+
+    const member =
+        members[0];
+
+
+    const username =
         (
-            event.type === "member" ||
-            event.type === "roomUser"
+            member.username ||
+            ""
         )
-    );
+        .replace(
+            /^@/,
+            ""
+        )
+        .toLowerCase();
 
-    if (!members.length) return;
 
-    const member = members[0];
+    /*
+     * هل هو شخص مميز؟
+     */
 
-    const username = (
-        member.username ||
-        ""
-    ).replace(/^@/, "").toLowerCase();
+    if (
+        !SPECIAL_USERS[username]
+    ) {
+        return;
+    }
 
-    if (!SPECIAL_USERS[username]) return;
 
     const eventId =
         member.id ||
         `${username}-${member.time || ""}`;
 
-    if (eventId === lastSpecialMemberId) return;
 
-    lastSpecialMemberId = eventId;
+    /*
+     * لا نعيد نفس الحدث
+     */
 
-    showSpecialMember(member);
+    if (
+        eventId ===
+        lastSpecialMemberId
+    ) {
+        return;
+    }
+
+
+    lastSpecialMemberId =
+        eventId;
+
+
+    showSpecialMember(
+        member
+    );
 }
 
+
+/* =========================================
+   SHOW SPECIAL MEMBER
+========================================= */
 
 function showSpecialMember(member) {
 
     const container =
-        document.getElementById("specialMember");
+        document.getElementById(
+            "specialMember"
+        );
+
 
     const avatar =
-        document.getElementById("specialAvatar");
+        document.getElementById(
+            "specialAvatar"
+        );
+
 
     const placeholder =
-        document.getElementById("specialAvatarPlaceholder");
+        document.getElementById(
+            "specialAvatarPlaceholder"
+        );
+
 
     const username =
-        document.getElementById("specialUsername");
+        document.getElementById(
+            "specialUsername"
+        );
 
-    if (!container) return;
+
+    if (!container) {
+        return;
+    }
+
 
     const name =
         member.nickname ||
         member.username ||
         "مستخدم";
 
-    username.textContent = name;
 
-    if (member.profilePicture) {
+    username.textContent =
+        name;
 
-        avatar.src = member.profilePicture;
 
-        avatar.style.display = "block";
-        placeholder.style.display = "none";
+    /* =====================================
+       PROFILE PICTURE
+    ===================================== */
+
+    if (
+        member.profilePicture
+    ) {
+
+        avatar.src =
+            member.profilePicture;
+
+
+        avatar.style.display =
+            "block";
+
+
+        placeholder.style.display =
+            "none";
+
 
         avatar.onerror = () => {
 
-            avatar.style.display = "none";
-            placeholder.style.display = "flex";
+            avatar.style.display =
+                "none";
+
+            placeholder.style.display =
+                "flex";
 
         };
 
     } else {
 
-        avatar.style.display = "none";
-        placeholder.style.display = "flex";
+        avatar.style.display =
+            "none";
 
+        placeholder.style.display =
+            "flex";
     }
 
-    container.classList.remove("show");
+
+    /* =====================================
+       SHOW
+    ===================================== */
+
+    container.classList.remove(
+        "show"
+    );
+
 
     void container.offsetWidth;
 
-    container.classList.add("show");
 
-    clearTimeout(specialMemberTimer);
+    container.classList.add(
+        "show"
+    );
 
-    specialMemberTimer = setTimeout(() => {
 
-        container.classList.remove("show");
+    /* =====================================
+       HIDE AFTER 10 SECONDS
+    ===================================== */
 
-    }, 10000);
+    clearTimeout(
+        specialMemberTimer
+    );
+
+
+    specialMemberTimer =
+        setTimeout(
+            () => {
+
+                container.classList.remove(
+                    "show"
+                );
+
+            },
+            10000
+        );
 }
