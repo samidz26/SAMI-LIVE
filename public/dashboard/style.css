@@ -740,7 +740,7 @@
     }
 }
 /* =========================================
-   SAMI LIVE - Premium Animated Header
+   SAMI LIVE — PREMIUM BROADCAST LOGO
    ========================================= */
 
 .app-header {
@@ -753,64 +753,133 @@
     z-index: 100;
 }
 
-.app-logo {
-    position: relative;
-    font-size: 30px;
-    font-weight: 900;
-    letter-spacing: 5px;
-    text-align: center;
+/* Ambient cinematic glow behind the logo */
+.app-header::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 280px;
+    height: 70px;
+    transform: translate(-50%, -50%);
 
-    /* Gold luxury gradient */
-    background: linear-gradient(
-        90deg,
-        #8f6b25,
-        #fff4b0,
-        #d4af37,
-        #ffffff,
-        #d4af37,
-        #fff4b0,
-        #8f6b25
+    background: radial-gradient(
+        ellipse,
+        rgba(212, 175, 55, 0.32) 0%,
+        rgba(212, 175, 55, 0.16) 35%,
+        rgba(212, 175, 55, 0.05) 60%,
+        transparent 75%
     );
 
-    background-size: 300% auto;
+    filter: blur(14px);
+    animation: samiCinematicPulse 3s ease-in-out infinite;
+
+    pointer-events: none;
+}
+
+/* Main logo */
+.app-logo {
+    position: relative;
+    z-index: 2;
+
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: 6px;
+    line-height: 1;
+
+    text-align: center;
+    white-space: nowrap;
+
+    background: linear-gradient(
+        115deg,
+        #7a591c 0%,
+        #c9a227 18%,
+        #fff3a6 35%,
+        #ffffff 50%,
+        #ffe477 65%,
+        #c9a227 82%,
+        #7a591c 100%
+    );
+
+    background-size: 300% 100%;
+
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
 
-    animation:
-        samiLogoShine 4s linear infinite,
-        samiLogoFloat 3s ease-in-out infinite;
-
+    /* Premium golden glow */
     filter:
-        drop-shadow(0 0 6px rgba(212,175,55,.45))
-        drop-shadow(0 0 18px rgba(212,175,55,.20));
+        drop-shadow(0 0 3px rgba(255, 220, 100, 0.9))
+        drop-shadow(0 0 10px rgba(212, 175, 55, 0.75))
+        drop-shadow(0 0 25px rgba(212, 175, 55, 0.38));
 
-    white-space: nowrap;
+    animation:
+        samiGoldFlow 5s linear infinite,
+        samiLogoPulse 3s ease-in-out infinite;
+
+    transform-origin: center;
 }
 
-/* Luxury light sweep */
+/* Moving cinematic light */
 .app-logo::after {
     content: "";
     position: absolute;
-    top: 0;
-    left: -120%;
-    width: 70%;
-    height: 100%;
+
+    top: -20%;
+    left: -100%;
+
+    width: 45%;
+    height: 140%;
 
     background: linear-gradient(
-        110deg,
-        transparent,
-        rgba(255,255,255,.9),
-        transparent
+        105deg,
+        transparent 0%,
+        transparent 35%,
+        rgba(255,255,255,0.15) 45%,
+        rgba(255,255,255,0.95) 50%,
+        rgba(255,255,255,0.15) 55%,
+        transparent 65%
     );
 
     transform: skewX(-20deg);
-    animation: samiLightSweep 4.5s ease-in-out infinite;
+
+    animation: samiPremiumSweep 4.5s ease-in-out infinite;
+
     pointer-events: none;
 }
 
-/* Golden gradient movement */
-@keyframes samiLogoShine {
+/* Fine golden aura */
+.app-logo::before {
+    content: "";
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 120%;
+    height: 180%;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    background: radial-gradient(
+        ellipse,
+        rgba(255, 215, 90, 0.14) 0%,
+        rgba(212, 175, 55, 0.06) 35%,
+        transparent 70%
+    );
+
+    filter: blur(10px);
+
+    animation: samiAuraPulse 3s ease-in-out infinite;
+
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Gold movement */
+@keyframes samiGoldFlow {
     0% {
         background-position: 300% center;
     }
@@ -820,51 +889,93 @@
     }
 }
 
-/* Very subtle floating movement */
-@keyframes samiLogoFloat {
-    0%, 100% {
-        transform: translateY(0);
+/* Cinematic breathing glow */
+@keyframes samiLogoPulse {
+    0%,
+    100% {
+        transform: scale(1);
+        filter:
+            drop-shadow(0 0 3px rgba(255, 220, 100, 0.8))
+            drop-shadow(0 0 10px rgba(212, 175, 55, 0.65))
+            drop-shadow(0 0 22px rgba(212, 175, 55, 0.28));
     }
 
     50% {
-        transform: translateY(-3px);
+        transform: scale(1.025);
+        filter:
+            drop-shadow(0 0 5px rgba(255, 230, 130, 1))
+            drop-shadow(0 0 16px rgba(212, 175, 55, 0.9))
+            drop-shadow(0 0 34px rgba(212, 175, 55, 0.45));
     }
 }
 
-/* Premium light passing through the logo */
-@keyframes samiLightSweep {
+/* Light sweep */
+@keyframes samiPremiumSweep {
     0% {
-        left: -120%;
+        left: -110%;
         opacity: 0;
     }
 
-    20% {
+    15% {
         opacity: 0;
     }
 
-    45% {
+    35% {
         opacity: 1;
     }
 
-    70% {
-        left: 140%;
+    55% {
+        left: 150%;
         opacity: 0;
     }
 
     100% {
-        left: 140%;
+        left: 150%;
         opacity: 0;
+    }
+}
+
+/* Main halo pulse */
+@keyframes samiCinematicPulse {
+    0%,
+    100% {
+        opacity: 0.55;
+        transform: translate(-50%, -50%) scale(0.90);
+    }
+
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.12);
+    }
+}
+
+/* Inner aura */
+@keyframes samiAuraPulse {
+    0%,
+    100% {
+        opacity: 0.35;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+
+    50% {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(1.08);
     }
 }
 
 /* Mobile */
 @media (max-width: 600px) {
+
     .app-logo {
-        font-size: 24px;
-        letter-spacing: 3px;
+        font-size: 25px;
+        letter-spacing: 4px;
     }
 
     .app-header {
         min-height: 60px;
+    }
+
+    .app-header::before {
+        width: 230px;
     }
 }
