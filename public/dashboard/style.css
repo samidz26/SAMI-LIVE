@@ -1510,3 +1510,11 @@
         font-size: 7px !important;
     }
     }
+/* =========================================
+   SAMI LIVE - HIDE TAPPER MEDALS
+   مع الحفاظ على نفس المساحة
+   ========================================= */
+
+.tapper-rank {
+    visibility: hidden !important;
+}
