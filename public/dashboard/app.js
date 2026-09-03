@@ -1,3 +1,10 @@
+const SPECIAL_USERS = {
+    "samizaouiadz": true,
+    "jordan_river13": true
+};
+
+let specialMemberTimer = null;
+let lastSpecialMemberId = null;
 let lastMemberId = null;
 
 
