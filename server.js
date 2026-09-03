@@ -355,8 +355,13 @@ app.post(
             /* =====================================
                CONNECTED
             ===================================== */
-connection.on("rawData", (data) => {
-    console.log("🔥 RAW DATA RECEIVED");
+connection.on("rawData", (messageTypeName, binary) => {
+
+    console.log(
+        "🔥 RAW:",
+        messageTypeName
+    );
+
 });
             connection.on(
                 "connected",
