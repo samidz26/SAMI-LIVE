@@ -8,26 +8,44 @@ const WebcastPushConnection =
     TikTokLiveConnector;
 
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+
+app.use(
+    express.static(
+        path.join(__dirname, "public")
+    )
+);
+
+
+/* =====================================================
+   CONNECTION
+===================================================== */
 
 let connection = null;
 let currentUsername = null;
 
-/* =========================
-   حالة البث
-========================= */
+
+/* =====================================================
+   LIVE STATE
+===================================================== */
 
 const liveState = {
+
     username: null,
+
     connected: false,
 
     viewers: 0,
+
     likes: 0,
+
     comments: 0,
+
     follows: 0,
+
     gifts: 0,
 
     /* أفضل المكبسين */
@@ -36,367 +54,1017 @@ const liveState = {
     /* الداخلون */
     members: [],
 
-    /* آخر التفاعلات */
+    /* آخر الأحداث */
     events: []
 };
 
-/* =========================
-   أدوات مساعدة
-========================= */
+
+/* =====================================================
+   USER DATA HELPERS
+===================================================== */
+
+/*
+ * TikTok Live Connector قد يعيد بيانات المستخدم
+ * مباشرة داخل data أو داخل data.user.
+ */
+
+function getUserObject(data) {
+
+    if (
+        data &&
+        data.user &&
+        typeof data.user === "object"
+    ) {
+        return data.user;
+    }
+
+    return data || {};
+}
+
 
 function getUserName(data) {
+
+    const user = getUserObject(data);
+
     return (
+        user.uniqueId ||
         data?.uniqueId ||
-        data?.user?.uniqueId ||
-        data?.nickname ||
-        data?.user?.nickname ||
+        user.unique_id ||
+        data?.unique_id ||
+        user.userName ||
+        data?.userName ||
+        user.username ||
+        data?.username ||
         "unknown"
     );
 }
 
+
 function getNickname(data) {
+
+    const user = getUserObject(data);
+
     return (
+        user.nickname ||
         data?.nickname ||
-        data?.user?.nickname ||
+        user.displayName ||
+        data?.displayName ||
         getUserName(data)
     );
 }
 
+
 function getProfilePicture(data) {
+
+    const user = getUserObject(data);
+
     return (
+        user.profilePictureUrl ||
         data?.profilePictureUrl ||
-        data?.user?.profilePictureUrl ||
+        user.profilePicture ||
         data?.profilePicture ||
+        user.avatarLarger ||
+        data?.avatarLarger ||
+        user.avatarMedium ||
+        data?.avatarMedium ||
         null
     );
 }
 
-function addEvent(type, data) {
+
+function getUserId(data) {
+
+    const user = getUserObject(data);
+
+    return (
+        user.userId ||
+        data?.userId ||
+        user.id ||
+        data?.id ||
+        null
+    );
+}
+
+
+/* =====================================================
+   EVENTS
+===================================================== */
+
+function addEvent(type, data, extra = {}) {
+
     liveState.events.unshift({
-        id: Date.now() + Math.random(),
+
+        id:
+            Date.now() +
+            Math.random(),
+
         type,
-        username: getUserName(data),
-        nickname: getNickname(data),
-        profilePicture: getProfilePicture(data),
-        time: new Date().toISOString()
+
+        username:
+            getUserName(data),
+
+        nickname:
+            getNickname(data),
+
+        profilePicture:
+            getProfilePicture(data),
+
+        time:
+            new Date().toISOString(),
+
+        ...extra
     });
 
-    /* الاحتفاظ بآخر 100 حدث فقط */
-    if (liveState.events.length > 100) {
+
+    if (
+        liveState.events.length >
+        100
+    ) {
         liveState.events.length = 100;
     }
 }
 
-/* =========================
-   الصفحة الرئيسية
-========================= */
+
+/* =====================================================
+   HOME
+===================================================== */
 
 app.get("/", (req, res) => {
+
     res.sendFile(
-        path.join(__dirname, "public", "index.html")
+        path.join(
+            __dirname,
+            "public",
+            "index.html"
+        )
     );
+
 });
 
-/* =========================
-   حالة البث
-========================= */
+
+/* =====================================================
+   STATUS API
+===================================================== */
 
 app.get("/api/status", (req, res) => {
-    res.json(liveState);
+
+    res.json({
+
+        ...liveState,
+
+        tappers:
+            liveState.tappers
+                .slice(0, 100),
+
+        members:
+            liveState.members
+                .slice(0, 1000),
+
+        events:
+            liveState.events
+                .slice(0, 100)
+
+    });
+
 });
 
-/* =========================
-   الاتصال بـ TikTok
-========================= */
 
-app.post("/api/connect", async (req, res) => {
+/* =====================================================
+   CONNECT API
+===================================================== */
 
-    const username = String(req.body.username || "")
-        .trim()
-        .replace(/^@/, "");
+app.post(
+    "/api/connect",
+    async (req, res) => {
 
-    if (!username) {
-        return res.status(400).json({
-            success: false,
-            message: "أدخل اسم مستخدم TikTok"
-        });
-    }
+        const username =
+            String(
+                req.body.username || ""
+            )
+                .trim()
+                .replace(/^@/, "");
 
-    /* قطع الاتصال السابق */
 
-    if (connection) {
-        try {
-            await connection.disconnect();
-        } catch (error) {
-            console.log("Disconnect warning:", error.message);
-        }
+        if (!username) {
 
-        connection = null;
-    }
+            return res
+                .status(400)
+                .json({
 
-    currentUsername = username;
+                    success: false,
 
-    /* تصفير بيانات البث */
+                    message:
+                        "أدخل اسم مستخدم TikTok"
 
-    liveState.username = username;
-    liveState.connected = false;
-
-    liveState.viewers = 0;
-    liveState.likes = 0;
-    liveState.comments = 0;
-    liveState.follows = 0;
-    liveState.gifts = 0;
-
-    liveState.tappers = [];
-    liveState.members = [];
-    liveState.events = [];
-
-    console.log("");
-    console.log("=================================");
-    console.log(`🔄 الاتصال بـ @${username}`);
-    console.log("=================================");
-
-    try {
-
-        connection = new WebcastPushConnection(username);
-
-        /* =========================
-           Connected
-        ========================= */
-
-        connection.on("connected", (state) => {
-
-            liveState.connected = true;
-
-            console.log(`✅ Connected: @${username}`);
-
-            if (state?.roomId) {
-                console.log(`Room ID: ${state.roomId}`);
-            }
-        });
-
-        /* =========================
-           Disconnected
-        ========================= */
-
-        connection.on("disconnected", () => {
-
-            liveState.connected = false;
-
-            console.log("❌ TikTok disconnected");
-        });
-
-        /* =========================
-           Error
-        ========================= */
-
-        connection.on("error", (error) => {
-
-            liveState.connected = false;
-
-            console.log(
-                "❌ TikTok Error:",
-                error?.message || error
-            );
-        });
-
-        /* =========================
-           دخول شخص
-        ========================= */
-
-        connection.on("member", (data) => {
-
-            const username = getUserName(data);
-            const nickname = getNickname(data);
-            const profilePicture = getProfilePicture(data);
-
-            console.log(`👤 دخل اللايف: @${username}`);
-
-            /* إضافة إلى القائمة */
-
-            const existing = liveState.members.find(
-                user => user.username === username
-            );
-
-            if (!existing) {
-
-                liveState.members.unshift({
-                    username,
-                    nickname,
-                    profilePicture,
-                    joinedAt: new Date().toISOString()
                 });
 
-            } else {
+        }
 
-                existing.joinCount =
-                    (existing.joinCount || 1) + 1;
+
+        /* =========================================
+           DISCONNECT OLD CONNECTION
+        ========================================= */
+
+        if (connection) {
+
+            try {
+
+                await connection.disconnect();
+
+            } catch (error) {
+
+                console.log(
+                    "Disconnect warning:",
+                    error?.message ||
+                    error
+                );
+
             }
 
-            /* الحد الأقصى 1000 شخص */
+            connection = null;
 
-            if (liveState.members.length > 1000) {
-                liveState.members.length = 1000;
-            }
+        }
 
-            addEvent("member", data);
-        });
 
-        /* =========================
-           تعليق
-        ========================= */
+        currentUsername =
+            username;
 
-        connection.on("chat", (data) => {
 
-            const username = getUserName(data);
-            const comment = data?.comment || "";
+        /* =========================================
+           RESET STATE
+        ========================================= */
 
-            liveState.comments++;
+        liveState.username =
+            username;
 
-            console.log(
-                `💬 @${username}: ${comment}`
-            );
+        liveState.connected =
+            false;
 
-            addEvent("chat", data);
-        });
+        liveState.viewers =
+            0;
 
-        /* =========================
-           متابعة
-        ========================= */
+        liveState.likes =
+            0;
 
-        connection.on("follow", (data) => {
+        liveState.comments =
+            0;
 
-            const username = getUserName(data);
+        liveState.follows =
+            0;
 
-            liveState.follows++;
+        liveState.gifts =
+            0;
 
-            console.log(
-                `❤️ @${username} تابع البث`
-            );
+        liveState.tappers =
+            [];
 
-            addEvent("follow", data);
-        });
+        liveState.members =
+            [];
 
-        /* =========================
-           تكبيس / Likes
-        ========================= */
+        liveState.events =
+            [];
 
-        connection.on("like", (data) => {
 
-            const username = getUserName(data);
-            const nickname = getNickname(data);
-            const profilePicture = getProfilePicture(data);
-
-            const count = Number(
-                data?.likeCount || 1
-            );
-
-            liveState.likes += count;
-
-            console.log(
-                `👍 @${username} ×${count}`
-            );
-
-            /* البحث عن المستخدم */
-
-            let tapper = liveState.tappers.find(
-                user => user.username === username
-            );
-
-            if (!tapper) {
-
-                tapper = {
-                    username,
-                    nickname,
-                    profilePicture,
-                    likes: 0
-                };
-
-                liveState.tappers.push(tapper);
-            }
-
-            /* إضافة التكبيسات */
-
-            tapper.likes += count;
-
-            /* ترتيب تنازلي */
-
-            liveState.tappers.sort(
-                (a, b) => b.likes - a.likes
-            );
-
-            /* الاحتفاظ بأفضل 100 */
-
-            if (liveState.tappers.length > 100) {
-                liveState.tappers.length = 100;
-            }
-
-            addEvent("like", data);
-        });
-
-        /* =========================
-           هدية
-        ========================= */
-
-        connection.on("gift", (data) => {
-
-            const username = getUserName(data);
-
-            const giftName =
-                data?.giftName ||
-                data?.gift?.name ||
-                "Unknown Gift";
-
-            liveState.gifts++;
-
-            console.log(
-                `🎁 @${username}: ${giftName}`
-            );
-
-            addEvent("gift", data);
-        });
-
-        /* =========================
-           بدء الاتصال
-        ========================= */
-
-        await connection.connect();
-
-        res.json({
-            success: true,
-            username,
-            message: "جاري الاتصال..."
-        });
-
-    } catch (error) {
-
-        liveState.connected = false;
+        console.log("");
 
         console.log(
-            "❌ فشل الاتصال:",
-            error?.message || error
+            "================================="
         );
 
-        res.status(500).json({
-            success: false,
-            message:
+        console.log(
+            `🔄 الاتصال بـ @${username}`
+        );
+
+        console.log(
+            "================================="
+        );
+
+
+        try {
+
+            /* =====================================
+               CREATE CONNECTION
+            ===================================== */
+
+            connection =
+                new WebcastPushConnection(
+                    username
+                );
+
+
+            /* =====================================
+               CONNECTED
+            ===================================== */
+
+            connection.on(
+                "connected",
+                (state) => {
+
+                    liveState.connected =
+                        true;
+
+                    console.log("");
+
+                    console.log(
+                        `✅ Connected: @${username}`
+                    );
+
+
+                    if (
+                        state?.roomId
+                    ) {
+
+                        console.log(
+                            `Room ID: ${state.roomId}`
+                        );
+
+                    }
+
+                }
+            );
+
+
+            /* =====================================
+               WEBSOCKET CONNECTED
+            ===================================== */
+
+            connection.on(
+                "websocketConnected",
+                () => {
+
+                    console.log(
+                        "🔌 WebSocket connected"
+                    );
+
+                }
+            );
+
+
+            /* =====================================
+               DISCONNECTED
+            ===================================== */
+
+            connection.on(
+                "disconnected",
+                (data) => {
+
+                    liveState.connected =
+                        false;
+
+                    console.log(
+                        "❌ TikTok disconnected",
+                        data || ""
+                    );
+
+                }
+            );
+
+
+            /* =====================================
+               STREAM END
+            ===================================== */
+
+            connection.on(
+                "streamEnd",
+                () => {
+
+                    liveState.connected =
+                        false;
+
+                    console.log(
+                        "🏁 TikTok LIVE انتهى"
+                    );
+
+                }
+            );
+
+
+            /* =====================================
+               ERROR
+            ===================================== */
+
+            connection.on(
+                "error",
+                (error) => {
+
+                    console.log(
+                        "❌ TikTok Error:",
+                        error?.message ||
+                        error
+                    );
+
+                }
+            );
+
+
+            /* =====================================
+               MEMBER
+               دخول شخص إلى اللايف
+            ===================================== */
+
+            connection.on(
+                "member",
+                (data) => {
+
+                    const username =
+                        getUserName(data);
+
+                    const nickname =
+                        getNickname(data);
+
+                    const profilePicture =
+                        getProfilePicture(data);
+
+                    const userId =
+                        getUserId(data);
+
+
+                    console.log("");
+
+                    console.log(
+                        `👤 دخل اللايف: @${username}`
+                    );
+
+                    console.log(
+                        `   الاسم: ${nickname}`
+                    );
+
+
+                    /* =========================
+                       البحث عن الشخص
+                    ========================= */
+
+                    const existing =
+                        liveState.members.find(
+                            user =>
+                                user.username ===
+                                username
+                        );
+
+
+                    /* =========================
+                       شخص جديد
+                    ========================= */
+
+                    if (!existing) {
+
+                        liveState.members.unshift({
+
+                            username,
+
+                            nickname,
+
+                            profilePicture,
+
+                            userId,
+
+                            joinedAt:
+                                new Date()
+                                    .toISOString(),
+
+                            joinCount: 1
+
+                        });
+
+                    }
+
+
+                    /* =========================
+                       شخص موجود
+                    ========================= */
+
+                    else {
+
+                        existing.joinCount =
+                            (
+                                existing.joinCount ||
+                                1
+                            ) + 1;
+
+                        existing.nickname =
+                            nickname;
+
+                        existing.profilePicture =
+                            profilePicture;
+
+                        existing.lastJoinedAt =
+                            new Date()
+                                .toISOString();
+
+                        /*
+                         * نعيده إلى الأعلى
+                         * لأنه دخل مرة أخرى
+                         */
+
+                        liveState.members =
+                            liveState.members.filter(
+                                user =>
+                                    user.username !==
+                                    username
+                            );
+
+                        liveState.members.unshift(
+                            existing
+                        );
+
+                    }
+
+
+                    /* =========================
+                       VIEWERS
+                    ========================= */
+
+                    if (
+                        Number.isFinite(
+                            Number(
+                                data?.memberCount
+                            )
+                        )
+                    ) {
+
+                        liveState.viewers =
+                            Number(
+                                data.memberCount
+                            );
+
+                    }
+
+
+                    /* =========================
+                       LIMIT
+                    ========================= */
+
+                    if (
+                        liveState.members.length >
+                        1000
+                    ) {
+
+                        liveState.members.length =
+                            1000;
+
+                    }
+
+
+                    /* =========================
+                       EVENT
+                    ========================= */
+
+                    addEvent(
+                        "member",
+                        data
+                    );
+
+                }
+            );
+
+
+            /* =====================================
+               ROOM USER
+               عدد المشاهدين
+            ===================================== */
+
+            connection.on(
+                "roomUser",
+                (data) => {
+
+                    const viewerCount =
+                        Number(
+                            data?.viewerCount ||
+                            data?.userCount ||
+                            data?.memberCount ||
+                            0
+                        );
+
+
+                    if (
+                        viewerCount >= 0
+                    ) {
+
+                        liveState.viewers =
+                            viewerCount;
+
+                    }
+
+
+                    console.log(
+                        `👁️ المشاهدون: ${liveState.viewers}`
+                    );
+
+                }
+            );
+
+
+            /* =====================================
+               CHAT
+            ===================================== */
+
+            connection.on(
+                "chat",
+                (data) => {
+
+                    const username =
+                        getUserName(data);
+
+                    const nickname =
+                        getNickname(data);
+
+                    const comment =
+                        data?.comment ||
+                        data?.content ||
+                        "";
+
+
+                    liveState.comments++;
+
+
+                    console.log(
+                        `💬 @${username}: ${comment}`
+                    );
+
+
+                    addEvent(
+                        "chat",
+                        data,
+                        {
+                            comment
+                        }
+                    );
+
+                }
+            );
+
+
+            /* =====================================
+               LIKE
+               التكبيس
+            ===================================== */
+
+            connection.on(
+                "like",
+                (data) => {
+
+                    const username =
+                        getUserName(data);
+
+                    const nickname =
+                        getNickname(data);
+
+                    const profilePicture =
+                        getProfilePicture(data);
+
+
+                    let count =
+                        Number(
+                            data?.likeCount ||
+                            data?.count ||
+                            1
+                        );
+
+
+                    if (
+                        !Number.isFinite(count) ||
+                        count < 1
+                    ) {
+
+                        count = 1;
+
+                    }
+
+
+                    /* =========================
+                       TOTAL LIKES
+                    ========================= */
+
+                    liveState.likes +=
+                        count;
+
+
+                    console.log(
+                        `❤️ @${username} ×${count}`
+                    );
+
+
+                    /* =========================
+                       FIND TAPPER
+                    ========================= */
+
+                    let tapper =
+                        liveState.tappers.find(
+                            user =>
+                                user.username ===
+                                username
+                        );
+
+
+                    /* =========================
+                       NEW TAPPER
+                    ========================= */
+
+                    if (!tapper) {
+
+                        tapper = {
+
+                            username,
+
+                            nickname,
+
+                            profilePicture,
+
+                            likes: 0
+
+                        };
+
+
+                        liveState.tappers.push(
+                            tapper
+                        );
+
+                    }
+
+
+                    /* =========================
+                       UPDATE USER DATA
+                    ========================= */
+
+                    tapper.nickname =
+                        nickname;
+
+                    tapper.profilePicture =
+                        profilePicture;
+
+
+                    /* =========================
+                       ADD LIKES
+                    ========================= */
+
+                    tapper.likes +=
+                        count;
+
+
+                    /* =========================
+                       SORT
+                    ========================= */
+
+                    liveState.tappers.sort(
+                        (a, b) =>
+                            b.likes -
+                            a.likes
+                    );
+
+
+                    /* =========================
+                       TOP 100
+                    ========================= */
+
+                    if (
+                        liveState.tappers.length >
+                        100
+                    ) {
+
+                        liveState.tappers.length =
+                            100;
+
+                    }
+
+
+                    /* =========================
+                       EVENT
+                    ========================= */
+
+                    addEvent(
+                        "like",
+                        data,
+                        {
+                            likeCount: count
+                        }
+                    );
+
+                }
+            );
+
+
+            /* =====================================
+               GIFT
+            ===================================== */
+
+            connection.on(
+                "gift",
+                (data) => {
+
+                    const username =
+                        getUserName(data);
+
+                    const giftName =
+                        data?.giftName ||
+                        data?.gift?.name ||
+                        "هدية";
+
+
+                    liveState.gifts++;
+
+
+                    console.log(
+                        `🎁 @${username}: ${giftName}`
+                    );
+
+
+                    addEvent(
+                        "gift",
+                        data,
+                        {
+                            giftName
+                        }
+                    );
+
+                }
+            );
+
+
+            /* =====================================
+               FOLLOW
+            ===================================== */
+
+            connection.on(
+                "follow",
+                (data) => {
+
+                    const username =
+                        getUserName(data);
+
+
+                    liveState.follows++;
+
+
+                    console.log(
+                        `➕ @${username} تابع البث`
+                    );
+
+
+                    addEvent(
+                        "follow",
+                        data
+                    );
+
+                }
+            );
+
+
+            /* =====================================
+               SOCIAL
+               بعض الإصدارات ترسل المتابعة هنا
+            ===================================== */
+
+            connection.on(
+                "social",
+                (data) => {
+
+                    const action =
+                        String(
+                            data?.action ||
+                            data?.displayType ||
+                            data?.label ||
+                            ""
+                        )
+                            .toLowerCase();
+
+
+                    /*
+                     * نعرض الحدث في السجل،
+                     * لكن لا نزيد follows هنا
+                     * لتجنب التكرار إذا كان
+                     * follow event موجودًا.
+                     */
+
+                    console.log(
+                        "📢 Social:",
+                        getUserName(data),
+                        action
+                    );
+
+
+                    addEvent(
+                        "social",
+                        data
+                    );
+
+                }
+            );
+
+
+            /* =====================================
+               SUBSCRIBE
+            ===================================== */
+
+            connection.on(
+                "subscribe",
+                (data) => {
+
+                    console.log(
+                        `⭐ اشتراك: @${getUserName(data)}`
+                    );
+
+
+                    addEvent(
+                        "subscribe",
+                        data
+                    );
+
+                }
+            );
+
+
+            /* =====================================
+               START CONNECTION
+            ===================================== */
+
+            await connection.connect();
+
+
+            /* =====================================
+               RESPONSE
+            ===================================== */
+
+            res.json({
+
+                success: true,
+
+                username,
+
+                message:
+                    "تم الاتصال باللايف"
+
+            });
+
+        }
+
+
+        catch (error) {
+
+            liveState.connected =
+                false;
+
+            connection =
+                null;
+
+
+            console.log("");
+
+            console.log(
+                "❌ فشل الاتصال:"
+            );
+
+            console.log(
                 error?.message ||
-                "فشل الاتصال"
-        });
+                error
+            );
+
+
+            res
+                .status(500)
+                .json({
+
+                    success: false,
+
+                    message:
+                        error?.message ||
+                        "فشل الاتصال بـ TikTok"
+
+                });
+
+        }
+
     }
-});
+);
 
-/* =========================
-   تشغيل السيرفر
-========================= */
 
-app.listen(PORT, () => {
+/* =====================================================
+   SERVER
+===================================================== */
 
-    console.log("=================================");
-    console.log("          SAMI LIVE");
-    console.log("=================================");
-    console.log(
-        `🚀 Server started on port ${PORT}`
-    );
-    console.log("=================================");
-});
+app.listen(
+    PORT,
+    "0.0.0.0",
+    () => {
+
+        console.log(
+            "================================="
+        );
+
+        console.log(
+            "          SAMI LIVE"
+        );
+
+        console.log(
+            "================================="
+        );
+
+        console.log(
+            `🚀 Server started on port ${PORT}`
+        );
+
+        console.log(
+            "================================="
+        );
+
+    }
+);
